@@ -64,6 +64,25 @@ export const getOauthUrls = (): {
   }
 }
 
+const seenUserPromptSessions = new Set<string>()
+
+const prepareFollowupPromptHeaders = (
+  sessionId: string | undefined,
+  isSubagent: boolean,
+  headers: Record<string, string>,
+) => {
+  if (!sessionId || isSubagent || headers["x-initiator"] !== "user") {
+    return
+  }
+
+  if (seenUserPromptSessions.has(sessionId)) {
+    headers["x-initiator"] = "agent"
+    return
+  }
+
+  seenUserPromptSessions.add(sessionId)
+}
+
 interface OauthAppConfig {
   clientId: string
   headers: Record<string, string>
@@ -101,6 +120,8 @@ export const prepareInteractionHeaders = (
   headers: Record<string, string>,
 ) => {
   const sendInteractionHeaders = !isOpencodeOauthApp()
+
+  prepareFollowupPromptHeaders(sessionId, isSubagent, headers)
 
   if (isSubagent) {
     headers["x-initiator"] = "agent"
