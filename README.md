@@ -287,6 +287,7 @@ The following command line options are available for the `start` command:
         "enabled": true,
         "baseUrl": "your-base-url",
         "apiKey": "sk-your-provider-key",
+        "authType": "x-api-key",
         "adjustInputTokens": false,
         "models": {
           "kimi-k2.5": {
@@ -321,7 +322,8 @@ The following command line options are available for the `start` command:
 - **providers:** Global upstream provider map. Each provider key (for example `custom`) becomes a route prefix (`/custom/v1/messages`). Currently only `type: "anthropic"` is supported.
   - `enabled` defaults to `true` if omitted.
   - `baseUrl` should be provider API base URL without trailing `/v1/messages`.
-  - `apiKey` is used as upstream `x-api-key`.
+  - `apiKey` is used as the upstream credential value.
+  - `authType` (optional): Controls how `apiKey` is sent upstream. Supports `x-api-key` (default) and `authorization`. When set to `authorization`, the proxy sends `Authorization: Bearer <apiKey>`.
   - `adjustInputTokens` (optional): When `true`, the proxy will adjust the `input_tokens` in the usage response by subtracting `cache_read_input_tokens` and `cache_creation_input_tokens`. 
   - `models` (optional): Per-model configuration map. Each key is a model ID (matching the model name in requests), and the value is:
     - `temperature` (optional): Default temperature value used when the request does not specify one.
@@ -614,7 +616,7 @@ Here is an example `.claude/settings.json` file:
 - Setting CLAUDE_CODE_ATTRIBUTION_HEADER to 0 can prevent Claude code from adding billing and version information in system prompts, thereby avoiding prompt cache invalidation.
 - Turning off CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION can prevent quota from being consumed unnecessarily.
 - Permissions deny WebSearch because the GitHub Copilot API does not support natie websearch (some gpt models support websearch, but the current project has not adapted websearch); it is recommended to install the mcp mcp_server_fetch tool or other search tools as alternatives..
-- Please do not enable `ENABLE_TOOL_SEARCH`, as the current Claude Code uses the client tool search mode. In this mode, loading defer tools requires an additional request each time, and cache hit rates are affected, so it does not necessarily save tokens. Only server tool search mode can save tokens. If using the gpt model, do not enable it either.
+- If using a non-Claude model, do not enable ENABLE_TOOL_SEARCH. If using the Claude model, can enable ENABLE_TOOL_SEARCH. The current Claude Code uses the client tool search mode. In this mode, loading defer tools requires an additional request each time, and cache hit rates are affected, so it does not necessarily save tokens，but it can save context. Only server tool search mode can save tokens.
 
 You can find more options here: [Claude Code settings](https://docs.anthropic.com/en/docs/claude-code/settings#environment-variables)
 
