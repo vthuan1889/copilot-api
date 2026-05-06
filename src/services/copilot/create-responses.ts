@@ -10,6 +10,7 @@ import {
   prepareForCompact,
   prepareInteractionHeaders,
 } from "~/lib/api-config"
+import { logCopilotRateLimits } from "~/lib/copilot-rate-limit"
 import { HTTPError } from "~/lib/error"
 import { state } from "~/lib/state"
 
@@ -26,6 +27,7 @@ export interface ResponsesPayload {
   stream?: boolean | null
   safety_identifier?: string | null
   prompt_cache_key?: string | null
+  prompt_cache_retention?: "in_memory" | "24h" | null
   parallel_tool_calls?: boolean | null
   store?: boolean | null
   reasoning?: Reasoning | null
@@ -402,6 +404,8 @@ export const createResponses = async (
     headers,
     body: JSON.stringify(payload),
   })
+
+  logCopilotRateLimits(response.headers)
 
   if (!response.ok) {
     consola.error("Failed to create responses", response)

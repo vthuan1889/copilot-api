@@ -15,3 +15,5 @@ dist/
 
 .opencode/
 *.vsix
+
+.claude
